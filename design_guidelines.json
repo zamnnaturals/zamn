@@ -1,0 +1,141 @@
+{
+  "theme": "dark",
+  "archetype": "5 (Luxury)",
+  "brand_name": "Zamn Naturals",
+  "colors": {
+    "background": "#0B0B0B",
+    "primary": "#1F4D3A",
+    "accent": "#D4AF37",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#EDEDED",
+    "surface": "#0B0B0B",
+    "border": "#D4AF37",
+    "hover_glow": "rgba(31, 77, 58, 0.5)",
+    "rules": {
+      "distribution": "70% black, 20% green, 10% gold",
+      "gold_usage": "Strictly for premium highlights, typography accents, and borders. Not for large backgrounds.",
+      "green_usage": "For primary CTA buttons and hover glows.",
+      "black_usage": "Primary canvas, surfaces, and negative space to create a luxury editorial feel."
+    }
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Cormorant Garamond, serif",
+      "weights": ["300", "400", "600"],
+      "letter_spacing": "tracking-tight",
+      "h1": "text-5xl sm:text-6xl md:text-7xl font-light",
+      "h2": "text-4xl sm:text-5xl font-light",
+      "h3": "text-2xl sm:text-3xl font-normal"
+    },
+    "body": {
+      "font_family": "Outfit, sans-serif",
+      "weights": ["300", "400", "500"],
+      "letter_spacing": "tracking-normal",
+      "base": "text-base font-light text-[#EDEDED]",
+      "small": "text-sm font-light text-[#EDEDED]/80",
+      "button": "text-sm uppercase tracking-[0.2em] font-medium"
+    }
+  },
+  "layout_and_spacing": {
+    "container": "max-w-7xl mx-auto px-6 md:px-12",
+    "section_padding": "py-24 md:py-32",
+    "grid": {
+      "bento_hero": "grid-cols-1 md:grid-cols-12 gap-6",
+      "product_grid": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8",
+      "category_grid": "grid-cols-1 md:grid-cols-3 gap-8 md:gap-12"
+    },
+    "surface_styles": {
+      "category_card": {
+        "background": "bg-[#0B0B0B]",
+        "border": "border border-[#D4AF37]/30",
+        "transition": "transition-all duration-500",
+        "hover": "hover:border-[#D4AF37] hover:shadow-[0_0_30px_rgba(31,77,58,0.4)] hover:-translate-y-2",
+        "padding": "p-10",
+        "corner": "rounded-none md:rounded-sm"
+      },
+      "product_card": {
+        "background": "bg-transparent",
+        "border": "border-none",
+        "hover_image": "scale-105 transition-transform duration-700"
+      }
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": {
+        "background": "bg-[#1F4D3A]",
+        "text": "text-white",
+        "padding": "px-8 py-4",
+        "border": "border border-[#1F4D3A]",
+        "hover": "hover:bg-transparent hover:border-[#1F4D3A] hover:text-[#1F4D3A] transition-all duration-300",
+        "typography": "uppercase tracking-[0.2em] text-sm"
+      },
+      "secondary": {
+        "background": "bg-transparent",
+        "text": "text-[#D4AF37]",
+        "padding": "px-8 py-4",
+        "border": "border border-[#D4AF37]",
+        "hover": "hover:bg-[#D4AF37] hover:text-[#0B0B0B] transition-all duration-300",
+        "typography": "uppercase tracking-[0.2em] text-sm"
+      }
+    },
+    "header": {
+      "style": "fixed top-0 w-full z-50 backdrop-blur-xl bg-[#0B0B0B]/80 border-b border-[#D4AF37]/10",
+      "logo": "font-serif text-2xl text-[#D4AF37] tracking-wider",
+      "links": "text-sm text-white/80 hover:text-[#D4AF37] transition-colors"
+    },
+    "footer": {
+      "background": "bg-[#0B0B0B]",
+      "border_top": "border-t border-[#D4AF37]/20",
+      "text": "text-white/60",
+      "heading": "text-[#D4AF37] font-serif text-xl"
+    }
+  },
+  "pages": {
+    "home": {
+      "hero": {
+        "background": "bg-[#0B0B0B]",
+        "title_color": "text-[#D4AF37]",
+        "button": "primary green CTA",
+        "tagline": "Natural & Herbal Beauty for Everyone",
+        "image_overlay": "bg-gradient-to-r from-[#0B0B0B] via-[#0B0B0B]/70 to-transparent",
+        "layout": "Content left aligned, full viewport height (min-h-[80vh]), large background image with gradient overlay for text readability."
+      },
+      "categories": {
+        "title": "Shop by Category",
+        "layout": "3 Big Cards layout (Women, Men, Kids)",
+        "card_styling": "Black background, subtle gold border, green hover glow. Inside: Category title in gold, elegant image covering top 60% of card, 'Explore' link."
+      }
+    },
+    "category": {
+      "layout": "Hero header with category name. Split view or filters on left, product grid on right.",
+      "sub_sections": ["Skin Care", "Cosmetics"]
+    },
+    "product_detail": {
+      "layout": "Two column: Large elegant image gallery on left, Product details on right.",
+      "actions": "Primary 'Add to Cart', Secondary 'Order via WhatsApp'. COD prominently mentioned."
+    },
+    "admin": {
+      "layout": "Dark mode dashboard. Green accents for active states, subtle gold for primary actions. Minimalist sidebar, data-dense table layouts."
+    }
+  },
+  "media": {
+    "images": {
+      "hero_banner": "https://images.unsplash.com/photo-1615397323136-22a00b0ccbe0?q=80&w=2070&auto=format&fit=crop",
+      "category_women": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=1000&auto=format&fit=crop",
+      "category_men": "https://images.unsplash.com/photo-1626245347209-482a0b48455e?q=80&w=1000&auto=format&fit=crop",
+      "category_kids": "https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=1000&auto=format&fit=crop",
+      "product_placeholder_1": "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800&auto=format&fit=crop",
+      "product_placeholder_2": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop",
+      "product_placeholder_3": "https://images.unsplash.com/photo-1599305090598-fe179d501227?q=80&w=800&auto=format&fit=crop"
+    }
+  },
+  "motion": {
+    "page_load": "Fade in with subtle slide up (Framer Motion).",
+    "scroll": "Lenis smooth scroll recommended.",
+    "hover_effects": "Slow transitions (duration-500 or 700) for luxury feel. No fast/snappy animations."
+  },
+  "testing": {
+    "attributes": "Add data-testid attributes to all interactive elements."
+  }
+}
