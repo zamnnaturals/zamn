@@ -338,20 +338,23 @@ app.include_router(api_router)
 app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 
-# CORS — explicit origin for credentials
-frontend_url = os.environ.get("FRONTEND_URL", "*")
+# CORS — allow any preview/preview-fork host with credentials by using a regex
 cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+frontend_url = os.environ.get("FRONTEND_URL", "")
+
 if cors_origins_env and cors_origins_env != "*":
     cors_origins = [o.strip() for o in cors_origins_env.split(",") if o.strip()]
+    cors_kwargs = {"allow_origins": cors_origins}
 else:
-    cors_origins = [frontend_url] if frontend_url and frontend_url != "*" else ["*"]
+    # Reflect any origin so cookies + credentials work across forked preview URLs.
+    cors_kwargs = {"allow_origin_regex": ".*"}
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    **cors_kwargs,
 )
 
 

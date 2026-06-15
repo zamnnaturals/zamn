@@ -4,14 +4,14 @@ const CartContext = createContext(null);
 const STORAGE_KEY = "zamn_cart";
 
 export function CartProvider({ children }) {
-    const [items, setItems] = useState([]);
-
-    useEffect(() => {
+    const [items, setItems] = useState(() => {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) setItems(JSON.parse(raw));
-        } catch { /* ignore */ }
-    }, []);
+            return raw ? JSON.parse(raw) : [];
+        } catch {
+            return [];
+        }
+    });
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
