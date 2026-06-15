@@ -1,56 +1,79 @@
 import { useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
+import { BrowserRouter, Routes, Route, useLocation, Outlet } from "react-router-dom";
+import { Toaster } from "sonner";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
+import { SettingsProvider } from "@/contexts/SettingsContext";
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+import Header from "@/components/site/Header";
+import Footer from "@/components/site/Footer";
+import ProtectedRoute from "@/components/site/ProtectedRoute";
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
+import Home from "@/pages/Home";
+import Category from "@/pages/Category";
+import ProductDetail from "@/pages/ProductDetail";
+import Cart from "@/pages/Cart";
+import Checkout from "@/pages/Checkout";
+import Journal from "@/pages/Journal";
+import AdminLogin from "@/pages/AdminLogin";
+import AdminDashboard from "@/pages/AdminDashboard";
 
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
-
-function App() {
-  return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
-  );
+function ScrollToTop() {
+    const { pathname } = useLocation();
+    useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+    return null;
 }
 
-export default App;
+function PublicLayout() {
+    return (
+        <>
+            <Header />
+            <Outlet />
+            <Footer />
+        </>
+    );
+}
+
+export default function App() {
+    return (
+        <div className="App">
+            <BrowserRouter>
+                <SettingsProvider>
+                    <AuthProvider>
+                        <CartProvider>
+                            <ScrollToTop />
+                            <Routes>
+                                <Route element={<PublicLayout />}>
+                                    <Route path="/" element={<Home />} />
+                                    <Route path="/shop/:section" element={<Category />} />
+                                    <Route path="/shop/:section/:subsection" element={<Category />} />
+                                    <Route path="/product/:slug" element={<ProductDetail />} />
+                                    <Route path="/cart" element={<Cart />} />
+                                    <Route path="/checkout" element={<Checkout />} />
+                                    <Route path="/journal" element={<Journal />} />
+                                </Route>
+                                <Route path="/admin/login" element={<AdminLogin />} />
+                                <Route path="/admin/*" element={
+                                    <ProtectedRoute><AdminDashboard /></ProtectedRoute>
+                                } />
+                            </Routes>
+                            <Toaster
+                                theme="dark"
+                                position="bottom-right"
+                                toastOptions={{
+                                    style: {
+                                        background: "#0d0d0d",
+                                        border: "1px solid rgba(212, 175, 55, 0.3)",
+                                        color: "#fff",
+                                    },
+                                }}
+                            />
+                        </CartProvider>
+                    </AuthProvider>
+                </SettingsProvider>
+            </BrowserRouter>
+        </div>
+    );
+}

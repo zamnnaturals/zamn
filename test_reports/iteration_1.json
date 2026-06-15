@@ -1,0 +1,41 @@
+{
+  "summary": "First end-to-end test pass for Zamn Naturals. Backend: 17/17 pytest tests passed against all required endpoints (auth, products, categories, settings, upload, orders, admin guards, COD enforcement). Frontend: home/category/product/cart-badge/checkout-payment/admin-login/admin-dashboard all render correctly. CRITICAL bug: the cart is wiped on every hard browser refresh because CartContext writes [] to localStorage on mount before it reads. Order placement, admin login, and admin tabs work.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "CORS config", "issue": "backend/.env CORS_ORIGINS='*' falls through to FRONTEND_URL (502dfeb4-...preview...) which does NOT match the actual frontend host (herbal-luxe-3.preview...). With allow_credentials=True the browser cannot set httpOnly cookies cross-origin. Login still works because the frontend uses Bearer-token localStorage fallback, but cookie-based auth is effectively broken in this deployment."},
+      {"endpoint": "/api/categories POST", "issue": "Returns 200 on create instead of 201 (minor REST nit)."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "CartContext (/app/frontend/src/contexts/CartContext.jsx)", "issue": "Cart is emptied on every hard page reload. The component initializes useState([]) and then uses two effects — the second (write) effect runs on mount and overwrites localStorage with '[]' before the first (read) effect's setItems can commit. Reproduced: add to cart → localStorage holds the item → press F5 → localStorage becomes '[]' and Cart page shows 'Your cart is empty'. Fix: initialize state lazily, e.g. useState(() => { try { return JSON.parse(localStorage.getItem('zamn_cart')) || []; } catch { return []; } }) and remove the read-effect.", "selector": "[data-testid='cart-page']", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix CartContext race condition that wipes localStorage on page reload (use lazy useState initializer).",
+    "Align backend CORS_ORIGINS (or FRONTEND_URL) with the actual public frontend host so httpOnly cookies are usable; today only Bearer fallback works."
+  ],
+  "critical_code_review_comments": [
+    "CartContext.jsx uses an unsafe init pattern (useState([]) + read effect + write effect) — write effect fires on first commit and clobbers localStorage. Lazy initializer is the fix.",
+    "server.py CORS resolution logic ignores CORS_ORIGINS='*' and silently falls back to FRONTEND_URL; document or simplify (allow '*' only when allow_credentials=False).",
+    "POST /api/categories and POST /api/products return 200 instead of 201 for created resources.",
+    "Order creation does not decrement product stock — acceptable for MVP but worth flagging."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (new)"
+  ],
+  "success_rate": {"backend": "100% (17/17)", "frontend": "~90% (all flows render & navigate; cart-reload-persistence broken)"},
+  "test_credentials": "admin@zamnnaturals.com / ZamnAdmin@2026 — works.",
+  "seed_data_creation": "Backend already seeds 8 demo products, 33 categories, default settings, and admin user on startup. Tests create/delete TEST_ prefixed resources and restore payment_methods after toggling.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend test suite at /app/backend/tests/backend_test.py is the regression suite — runs in ~5s. The cart reload bug is reproducible by: open site, add any product to cart, hit browser refresh on /cart — should show empty. After the fix, verify localStorage 'zamn_cart' persists across reload and the cart page lists items. Also verify the full checkout flow (fill form + Place Order) shows ZN- order_number confirmation; this was blocked in UI testing by the cart bug.",
+  "rca_of_the_issue": "CartContext.jsx pattern:\n  const [items, setItems] = useState([]);\n  useEffect(()=>{ /* read from localStorage and setItems(...) */ }, []);\n  useEffect(()=>{ localStorage.setItem(...JSON.stringify(items)) }, [items]);\nOn each fresh mount: render commits with items=[], then mount effects run in declaration order. The read effect reads the saved cart and schedules setItems(saved). The write effect fires immediately after with the still-current closure value items=[] and persists '[]' to localStorage — wiping the saved cart. The deferred re-render later writes the now-restored items back, but in practice (esp. when an unrelated component or React.StrictMode causes an extra effect cycle, or any race with cross-tab events) the cart can remain empty as observed. Mitigation: use a lazy state initializer that synchronously hydrates from localStorage on the very first render, so the write effect only ever persists the real cart."
+}
