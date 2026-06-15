@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from "react";
-import { Plus, Pencil, Trash2, X, Upload, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Upload, Loader2, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import api, { resolveImageUrl } from "@/lib/api";
+import MediaPicker from "@/components/site/MediaPicker";
 
 const SECTIONS = ["women", "men", "kids"];
 const SUBS = ["skincare", "cosmetics"];
@@ -27,6 +28,7 @@ export default function AdminProducts() {
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState(empty);
     const [uploading, setUploading] = useState(false);
+    const [pickerOpen, setPickerOpen] = useState(false);
     const fileRef = useRef();
     const [search, setSearch] = useState("");
 
@@ -198,14 +200,21 @@ export default function AdminProducts() {
                                             </button>
                                         </div>
                                     ))}
+                                    <button type="button" onClick={() => setPickerOpen(true)}
+                                        className="aspect-square border border-dashed border-gold/40 hover:border-gold flex flex-col items-center justify-center gap-1 text-white/50 hover:text-gold transition-colors"
+                                        data-testid="form-pick-from-library">
+                                        <ImagePlus size={18} />
+                                        <span className="text-[10px] uppercase tracking-luxe">Library</span>
+                                    </button>
                                     <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-                                        className="aspect-square border border-dashed border-gold/40 hover:border-gold flex items-center justify-center text-white/50 hover:text-gold transition-colors"
+                                        className="aspect-square border border-dashed border-white/30 hover:border-gold flex flex-col items-center justify-center gap-1 text-white/50 hover:text-gold transition-colors"
                                         data-testid="form-upload-btn">
                                         {uploading ? <Loader2 className="animate-spin" size={18} /> : <Upload size={18} />}
+                                        <span className="text-[10px] uppercase tracking-luxe">Upload</span>
                                     </button>
                                 </div>
                                 <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => upload(e.target.files?.[0])} />
-                                <p className="text-[10px] text-white/40">PNG, JPG or WEBP. Max 5MB each.</p>
+                                <p className="text-[10px] text-white/40">Pick from your media library or upload new (PNG, JPG, WEBP — max 10MB).</p>
                             </div>
 
                             <div className="flex items-center gap-6 pt-2">
@@ -229,6 +238,16 @@ export default function AdminProducts() {
                     </div>
                 </div>
             )}
+
+            <MediaPicker
+                open={pickerOpen}
+                onClose={() => setPickerOpen(false)}
+                multiple
+                onPick={(urls) => {
+                    const list = Array.isArray(urls) ? urls : [urls];
+                    setForm((f) => ({ ...f, images: [...f.images, ...list.filter((u) => !f.images.includes(u))] }));
+                }}
+            />
         </div>
     );
 }

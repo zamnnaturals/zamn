@@ -1,0 +1,46 @@
+{
+  "summary": "Phase 2 end-to-end test pass. Backend: 41/41 pytest tests pass (17 Phase 1 regression + 24 new Phase 2 — CMS, media library, customer auth, coupons, reviews, inventory decrement, EasyPaisa/JazzCash manual payment, /orders/{id}/payment, payment_instructions in settings). Found + FIXED a critical ObjectId-not-serializable bug on POST /api/media and POST /api/coupons (insert_one was mutating the dict with _id and the endpoint returned it as-is → 500). Frontend: admin login, /admin/content with all 6 tabs (Hero, Category Cards, Category Pages, Value Strip, Quote Block, Journal), Hero edit-save-persist verified on home page, /admin/media renders with Upload + Search, checkout shows coupon Apply UI + COD/WhatsApp/EasyPaisa/JazzCash, add-to-cart works, product Reviews section visible.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/media, POST /api/media/bulk, POST /api/coupons", "issue": "Returned 500 'ObjectId not iterable / vars() argument must have __dict__ attribute'. Root cause: motor's insert_one mutates the passed dict to include a BSON ObjectId in _id; these endpoints then returned the same dict via FastAPI's jsonable_encoder which can't serialize ObjectId. FIXED by adding `.pop('_id', None)` after insert_one in `_save_upload()` (line 277-278) and `create_coupon()` (line 452-453) in /app/backend/server.py. Re-tested: all media + coupon endpoints now return 200."},
+      {"endpoint": "GET /api/coupons/validate", "issue": "404 'Coupon not found' is returned for unknown codes; consistent but consider 400 for clarity (minor REST nit)."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "AdminContent — Hero 'Background Image' preview", "issue": "When hero.image_url is set to an external/non-resolvable URL, the small preview <img> appears as a broken-image icon next to the 'Change Image' link. Cosmetic only — Save & home rendering still work.", "selector": "[data-testid='admin-content-hero']", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_phase2.py",
+    "/app/test_reports/pytest/phase2_results.xml"
+  ],
+  "action_items": [
+    "(Done by tester) Strip _id after insert_one in `_save_upload` and `create_coupon` in /app/backend/server.py. Pattern to audit elsewhere: any place that does `insert_one(doc)` and then returns `doc` directly must `.pop('_id', None)` first or call `strip_mongo_id`. server.py:223 (create_product) and 169 (create_category) use Pydantic model_dump returned-from-input (no _id risk), and 473/570/646 already either pop _id or build a fresh dict — verified safe.",
+    "(Optional) Add a small data-testid='hero-image-preview' and gracefully hide the <img> when src is empty/invalid (cosmetic)."
+  ],
+  "critical_code_review_comments": [
+    "BUG (fixed): Direct return of dict mutated by motor.insert_one() introduces ObjectId — happened on POST /media, POST /media/bulk, POST /coupons. Recommend a central helper used after every insert.",
+    "GET /api/content/{key} returns {key, data:{}} when block is missing (no 404). Acceptable for CMS fallback; document this contract for the frontend.",
+    "Coupon code is normalized to uppercase on create AND on _validate_coupon (good). Frontend should also uppercase before display.",
+    "POST /api/orders silently swallows get_current_customer errors via bare except — fine for guests, but should `except HTTPException` only to avoid masking real failures.",
+    "Inventory: products with stock=0 are treated as unlimited (made-to-order) per spec — confirmed working.",
+    "Same Phase-1 nit persists: POST routes (products, categories, coupons, media) return 200 instead of 201 for created resources."
+  ],
+  "updated_files": [
+    "/app/backend/server.py (fixed _id leak in _save_upload + create_coupon)",
+    "/app/backend/tests/test_phase2.py (new — 24 tests)",
+    "/app/test_reports/pytest/phase2_results.xml (new)"
+  ],
+  "success_rate": {"backend": "100% (41/41 pytest)", "frontend": "~95% — admin CMS, media, checkout coupon/EasyPaisa UI, reviews section, cart all render and integrate; signup→/account redirect not verified end-to-end via Playwright (see note below)"},
+  "test_credentials": "admin@zamnnaturals.com / ZamnAdmin@2026 (verified). Test customers created on the fly via /api/customer/auth/signup.",
+  "seed_data_creation": "Backend tests create TEST_-prefixed products, media, coupons, reviews and clean them up. Some legacy media records (test.png, a.png, b.png, test_media.png) remain visible in /admin/media from earlier failed-cleanup runs before the _id bug was fixed — main agent can purge them via DELETE /api/media/{id} if desired.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend regression: `pytest /app/backend/tests/ -v` → expect 41 passing in ~70s. The two test files split clean: backend_test.py = Phase 1, test_phase2.py = Phase 2. Frontend: /signup uses floating-label inputs WITHOUT native `name`/`placeholder` attributes — use the data-testid='customer-signup-{name|email|phone|password}' selectors to fill the form (and 'customer-signup-submit' for submit) and verify the redirect to /account. The form's code path navigates to redirectTo on success; backend signup itself is 100% verified by tests.",
+  "rca_of_the_issue": "POST /api/media and POST /api/coupons returned 500. Traceback showed ValueError: [TypeError(\"'ObjectId' object is not iterable\"), TypeError('vars() argument must have __dict__ attribute')] from fastapi/encoders.py:330. Root cause: motor's `await collection.insert_one(doc)` injects the new BSON `_id` field into the *same* dict reference. The handlers then `return doc` directly, so FastAPI's jsonable_encoder tries to serialize the ObjectId and fails. Mitigation applied: `doc.pop('_id', None)` immediately after insert_one in `_save_upload()` and `create_coupon()`. All 24 Phase-2 tests now pass."
+}

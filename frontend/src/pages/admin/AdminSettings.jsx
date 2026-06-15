@@ -24,6 +24,7 @@ export default function AdminSettings() {
                 contact: form.contact,
                 social: form.social,
                 payment_methods: form.payment_methods,
+                payment_instructions: form.payment_instructions,
                 currency: form.currency,
                 currency_symbol: form.currency_symbol,
                 shipping_fee: parseFloat(form.shipping_fee) || 0,
@@ -84,12 +85,32 @@ export default function AdminSettings() {
                 </Section>
 
                 <Section title="Payment methods">
-                    <p className="text-xs text-white/50 mb-4 col-span-full font-light">Enable or disable payment options. EasyPaisa/JazzCash/Stripe are placeholders — enable when integrated.</p>
+                    <p className="text-xs text-white/50 mb-4 col-span-full font-light">Enable or disable payment options. For EasyPaisa/JazzCash, customers get the account details after checkout and confirm via WhatsApp.</p>
                     <Toggle label="Cash on Delivery" value={form.payment_methods.cod} onChange={(v) => setField("payment_methods.cod", v)} testid="pm-cod" />
                     <Toggle label="WhatsApp Order" value={form.payment_methods.whatsapp_order} onChange={(v) => setField("payment_methods.whatsapp_order", v)} testid="pm-wa" />
-                    <Toggle label="EasyPaisa (placeholder)" value={form.payment_methods.easypaisa} onChange={(v) => setField("payment_methods.easypaisa", v)} testid="pm-ep" />
-                    <Toggle label="JazzCash (placeholder)" value={form.payment_methods.jazzcash} onChange={(v) => setField("payment_methods.jazzcash", v)} testid="pm-jc" />
+                    <Toggle label="EasyPaisa (manual)" value={form.payment_methods.easypaisa} onChange={(v) => setField("payment_methods.easypaisa", v)} testid="pm-ep" />
+                    <Toggle label="JazzCash (manual)" value={form.payment_methods.jazzcash} onChange={(v) => setField("payment_methods.jazzcash", v)} testid="pm-jc" />
                     <Toggle label="Stripe (placeholder)" value={form.payment_methods.stripe} onChange={(v) => setField("payment_methods.stripe", v)} testid="pm-stripe" />
+                </Section>
+
+                <Section title="EasyPaisa details (shown to customer)">
+                    <Field label="Account name" value={form.payment_instructions?.easypaisa_account_name} onChange={(v) => setField("payment_instructions.easypaisa_account_name", v)} testid="ep-name" />
+                    <Field label="Account / mobile number" value={form.payment_instructions?.easypaisa_account_number} onChange={(v) => setField("payment_instructions.easypaisa_account_number", v)} testid="ep-num" />
+                    <div className="md:col-span-2">
+                        <label className="block text-[10px] uppercase tracking-luxe text-white/50 mb-2">Note / instructions</label>
+                        <textarea value={form.payment_instructions?.easypaisa_note || ""} onChange={(e) => setField("payment_instructions.easypaisa_note", e.target.value)} rows={2}
+                            className="w-full bg-transparent border border-white/15 focus:border-gold outline-none px-3 py-2 text-sm" />
+                    </div>
+                </Section>
+
+                <Section title="JazzCash details (shown to customer)">
+                    <Field label="Account name" value={form.payment_instructions?.jazzcash_account_name} onChange={(v) => setField("payment_instructions.jazzcash_account_name", v)} testid="jc-name" />
+                    <Field label="Account / mobile number" value={form.payment_instructions?.jazzcash_account_number} onChange={(v) => setField("payment_instructions.jazzcash_account_number", v)} testid="jc-num" />
+                    <div className="md:col-span-2">
+                        <label className="block text-[10px] uppercase tracking-luxe text-white/50 mb-2">Note / instructions</label>
+                        <textarea value={form.payment_instructions?.jazzcash_note || ""} onChange={(e) => setField("payment_instructions.jazzcash_note", e.target.value)} rows={2}
+                            className="w-full bg-transparent border border-white/15 focus:border-gold outline-none px-3 py-2 text-sm" />
+                    </div>
                 </Section>
 
                 <Section title="Shipping & Currency">

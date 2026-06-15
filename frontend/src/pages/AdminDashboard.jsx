@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, NavLink, Routes, Route, Navigate } from "react-router-dom";
-import { LogOut, Package, FolderTree, Settings as SettingsIcon, ShoppingCart, LayoutDashboard } from "lucide-react";
+import { LogOut, Package, FolderTree, Settings as SettingsIcon, ShoppingCart, LayoutDashboard, Image as ImageIcon, FileText, Tag } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import AdminProducts from "@/pages/admin/AdminProducts";
 import AdminCategories from "@/pages/admin/AdminCategories";
 import AdminSettings from "@/pages/admin/AdminSettings";
 import AdminOrders from "@/pages/admin/AdminOrders";
 import AdminOverview from "@/pages/admin/AdminOverview";
+import AdminMedia from "@/pages/admin/AdminMedia";
+import AdminContent from "@/pages/admin/AdminContent";
+import AdminCoupons from "@/pages/admin/AdminCoupons";
 
 export default function AdminDashboard() {
     const { user, logout } = useAuth();
@@ -14,9 +17,12 @@ export default function AdminDashboard() {
 
     const sidebar = [
         { to: "/admin", icon: LayoutDashboard, label: "Overview", end: true },
+        { to: "/admin/content", icon: FileText, label: "Content" },
+        { to: "/admin/media", icon: ImageIcon, label: "Media" },
         { to: "/admin/products", icon: Package, label: "Products" },
         { to: "/admin/categories", icon: FolderTree, label: "Categories" },
         { to: "/admin/orders", icon: ShoppingCart, label: "Orders" },
+        { to: "/admin/coupons", icon: Tag, label: "Coupons" },
         { to: "/admin/settings", icon: SettingsIcon, label: "Settings" },
     ];
 
@@ -91,9 +97,12 @@ export default function AdminDashboard() {
 
                 <Routes>
                     <Route index element={<AdminOverview />} />
+                    <Route path="content" element={<AdminContent />} />
+                    <Route path="media" element={<AdminMedia />} />
                     <Route path="products" element={<AdminProducts />} />
                     <Route path="categories" element={<AdminCategories />} />
                     <Route path="orders" element={<AdminOrders />} />
+                    <Route path="coupons" element={<AdminCoupons />} />
                     <Route path="settings" element={<AdminSettings />} />
                     <Route path="*" element={<Navigate to="/admin" replace />} />
                 </Routes>

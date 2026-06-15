@@ -107,3 +107,21 @@ async def require_admin(request: Request, db) -> dict:
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
+
+
+async def get_current_customer(request: Request, db) -> dict:
+    """For storefront customer accounts (separate from admin user)."""
+    token = get_token_from_request(request)
+    payload = decode_token(token)
+    if payload.get("type") != "access":
+        raise HTTPException(status_code=401, detail="Invalid token type")
+    role = payload.get("role")
+    if role not in ("customer", "admin"):  # admins can also browse customer endpoints
+        raise HTTPException(status_code=403, detail="Customer access required")
+    coll = "customers" if role == "customer" else "users"
+    record = await db[coll].find_one({"id": payload["sub"]})
+    if not record:
+        raise HTTPException(status_code=401, detail="Account not found")
+    record.pop("_id", None)
+    record.pop("password_hash", None)
+    return record

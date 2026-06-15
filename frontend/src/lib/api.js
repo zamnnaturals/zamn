@@ -8,12 +8,16 @@ const api = axios.create({
     withCredentials: true,
 });
 
-// Attach bearer token (fallback for environments where third-party cookies are blocked)
+// Attach bearer token (fallback for environments where third-party cookies are blocked).
+// Customer endpoints prefer the customer token; everything else prefers the admin token.
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("zamn_token");
-    if (token && !config.headers.Authorization) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
+    if (config.headers.Authorization) return config;
+    const customerToken = localStorage.getItem("zamn_customer_token");
+    const adminToken = localStorage.getItem("zamn_token");
+    const path = (config.url || "").toString();
+    const isCustomerScoped = path.startsWith("/customer/") || (path.startsWith("/reviews") && config.method && config.method.toLowerCase() !== "get");
+    const token = isCustomerScoped ? (customerToken || adminToken) : (adminToken || customerToken);
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
 });
 

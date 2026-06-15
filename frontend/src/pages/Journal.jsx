@@ -1,24 +1,23 @@
 import { Link } from "react-router-dom";
-
-const POSTS = [
-    { title: "The Ancient Art of Rosehip", excerpt: "Tracing 4,000 years of botanical wisdom — from Cleopatra's chambers to your morning serum.", image: "https://images.unsplash.com/photo-1502691876148-a84978e59af8?q=80&w=1200" },
-    { title: "Why Chemical-Free Matters", excerpt: "What your skin absorbs in a single day — and why ingredients should be readable.", image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=1200" },
-    { title: "Herbal Rituals for Every Age", excerpt: "From toddlers to teens to grown-ups — a botanical routine that grows with you.", image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1200" },
-];
+import { resolveImageUrl } from "@/lib/api";
+import { useContent } from "@/contexts/ContentContext";
 
 export default function Journal() {
+    const data = useContent("journal") || {};
+    const posts = data.posts || [];
+
     return (
         <div className="bg-ink text-white pt-28 pb-24 min-h-screen" data-testid="journal-page">
             <div className="max-w-7xl mx-auto px-6 md:px-10">
-                <div className="text-xs uppercase tracking-luxe text-gold mb-3">— The Zamn journal</div>
-                <h1 className="font-serif text-5xl md:text-7xl font-light mb-4">Stories from the garden.</h1>
-                <p className="text-white/60 max-w-lg font-light">Botanical knowledge, herbal traditions, and slow beauty — distilled into reading rituals.</p>
+                <div className="text-xs uppercase tracking-luxe text-gold mb-3">— {data.intro_overline || "The Zamn journal"}</div>
+                <h1 className="font-serif text-5xl md:text-7xl font-light mb-4">{data.intro_title || "Stories from the garden."}</h1>
+                <p className="text-white/60 max-w-lg font-light">{data.intro_subtitle}</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-                    {POSTS.map((p) => (
-                        <article key={p.title} className="group cursor-default">
+                    {posts.map((p, i) => (
+                        <article key={i} className="group cursor-default">
                             <div className="aspect-[4/5] overflow-hidden mb-5 bg-[#111]">
-                                <img src={p.image} alt={p.title} className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105" />
+                                {p.image_url && <img src={resolveImageUrl(p.image_url)} alt={p.title} className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105" />}
                             </div>
                             <h2 className="font-serif text-2xl group-hover:text-gold transition-colors">{p.title}</h2>
                             <p className="text-sm text-white/60 mt-2 font-light leading-relaxed">{p.excerpt}</p>

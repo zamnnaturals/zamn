@@ -227,6 +227,75 @@ async def create_indexes(db) -> None:
     await db.categories.create_index([("section", 1), ("sub_section", 1)])
     await db.orders.create_index("id", unique=True)
     await db.orders.create_index("order_number", unique=True)
+    await db.customers.create_index("email", unique=True)
+    await db.customers.create_index("id", unique=True)
+    await db.media.create_index("id", unique=True)
+    await db.media.create_index("created_at")
+    await db.content.create_index("key", unique=True)
+    await db.coupons.create_index("code", unique=True)
+    await db.coupons.create_index("id", unique=True)
+    await db.reviews.create_index("id", unique=True)
+    await db.reviews.create_index([("product_id", 1), ("customer_id", 1)])
+
+
+DEFAULT_CONTENT_BLOCKS = {
+    "hero": {
+        "overline": "Zamn Naturals · Est. 2026",
+        "title_top": "Natural &",
+        "title_main": "Herbal Beauty",
+        "title_italic": "for everyone.",
+        "subtitle": "Crafted in small batches with sun-kissed botanicals — for women, men, and the littlest ones. A modern ritual rooted in ancient wisdom.",
+        "image_url": "https://images.unsplash.com/photo-1615397323136-22a00b0ccbe0?q=80&w=2070&auto=format&fit=crop",
+        "primary_cta_label": "Shop Now",
+        "primary_cta_url": "/shop/women",
+        "secondary_cta_label": "Discover the Story",
+        "secondary_cta_url": "/journal",
+    },
+    "values": {
+        "items": [
+            {"icon": "Leaf", "title": "100% Herbal", "text": "Pure botanicals sourced ethically."},
+            {"icon": "ShieldCheck", "title": "Chemical-Free", "text": "No parabens, no sulfates, ever."},
+            {"icon": "Sparkles", "title": "Dermatologist Loved", "text": "Tested gentle on every skin."},
+            {"icon": "Truck", "title": "Free Shipping", "text": "On orders above Rs. 5,000."},
+        ]
+    },
+    "categories_section": {
+        "overline": "Curated collections",
+        "title": "Shop by ritual.",
+        "subtitle": "From morning serums to evening oils — each formulation is designed for a specific skin journey. Choose yours.",
+        "cards": [
+            {"key": "women", "label": "Women", "caption": "Botanical rituals", "image_url": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1200&auto=format&fit=crop"},
+            {"key": "men", "label": "Men", "caption": "Quiet strength", "image_url": "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?q=80&w=1200&auto=format&fit=crop"},
+            {"key": "kids", "label": "Kids", "caption": "Gentle as petals", "image_url": "https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=1200&auto=format&fit=crop"},
+        ],
+    },
+    "story_quote": {
+        "quote": "Beauty isn't built in a lab. It's brewed in nature, steeped in patience, and bottled with intention.",
+        "attribution": "The Zamn Naturals Promise",
+    },
+    "category_pages": {
+        "women": {"title": "Women", "tagline": "Botanical rituals for every chapter.", "image_url": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=2000&auto=format&fit=crop"},
+        "men": {"title": "Men", "tagline": "Quiet strength, herbal precision.", "image_url": "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?q=80&w=2000&auto=format&fit=crop"},
+        "kids": {"title": "Kids", "tagline": "Gentle as petals. Safe as a hug.", "image_url": "https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=2000&auto=format&fit=crop"},
+    },
+    "journal": {
+        "intro_overline": "The Zamn journal",
+        "intro_title": "Stories from the garden.",
+        "intro_subtitle": "Botanical knowledge, herbal traditions, and slow beauty — distilled into reading rituals.",
+        "posts": [
+            {"title": "The Ancient Art of Rosehip", "excerpt": "Tracing 4,000 years of botanical wisdom — from Cleopatra's chambers to your morning serum.", "image_url": "https://images.unsplash.com/photo-1502691876148-a84978e59af8?q=80&w=1200"},
+            {"title": "Why Chemical-Free Matters", "excerpt": "What your skin absorbs in a single day — and why ingredients should be readable.", "image_url": "https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=1200"},
+            {"title": "Herbal Rituals for Every Age", "excerpt": "From toddlers to teens to grown-ups — a botanical routine that grows with you.", "image_url": "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1200"},
+        ],
+    },
+}
+
+
+async def seed_content(db) -> None:
+    for key, data in DEFAULT_CONTENT_BLOCKS.items():
+        existing = await db.content.find_one({"key": key})
+        if existing is None:
+            await db.content.insert_one({"key": key, "data": data, "updated_at": now_iso()})
 
 
 async def run_all(db) -> None:
@@ -235,3 +304,4 @@ async def run_all(db) -> None:
     await seed_settings(db)
     await seed_categories(db)
     await seed_products(db)
+    await seed_content(db)

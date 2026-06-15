@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Plus, Minus, ShoppingBag, MessageCircle, Truck, ShieldCheck, Leaf } from "lucide-react";
+import { Plus, Minus, ShoppingBag, MessageCircle, Truck, ShieldCheck, Leaf, Star } from "lucide-react";
 import api, { resolveImageUrl } from "@/lib/api";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { toast } from "sonner";
 import ProductCard from "@/components/site/ProductCard";
+import Reviews from "@/components/site/Reviews";
 
 export default function ProductDetail() {
     const { slug } = useParams();
@@ -177,6 +178,9 @@ export default function ProductDetail() {
                         </div>
                     </section>
                 )}
+
+                {/* Reviews */}
+                <Reviews productId={product.id} productSlug={product.slug} />
             </div>
         </div>
     );

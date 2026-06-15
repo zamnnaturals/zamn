@@ -1,8 +1,9 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { ShoppingBag, User, Menu, X, Search } from "lucide-react";
+import { ShoppingBag, User, Menu, X } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 
 const NAV = [
     { label: "Women", to: "/shop/women" },
@@ -14,6 +15,7 @@ const NAV = [
 export default function Header() {
     const { count } = useCart();
     const { settings } = useSettings();
+    const { user: customer } = useCustomerAuth();
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -56,10 +58,10 @@ export default function Header() {
                     {/* Right actions */}
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => navigate("/admin/login")}
-                            data-testid="admin-icon-btn"
+                            onClick={() => navigate(customer && customer.role === "customer" ? "/account" : "/login")}
+                            data-testid="account-icon-btn"
                             className="text-white/70 hover:text-gold transition-colors hidden sm:inline-flex"
-                            aria-label="Admin"
+                            aria-label={customer ? "Account" : "Sign in"}
                         >
                             <User size={20} strokeWidth={1.2} />
                         </button>
@@ -105,11 +107,11 @@ export default function Header() {
                         </NavLink>
                     ))}
                     <NavLink
-                        to="/admin/login"
+                        to={customer && customer.role === "customer" ? "/account" : "/login"}
                         onClick={() => setOpen(false)}
                         className="block text-sm uppercase tracking-luxe text-white/80 hover:text-gold"
                     >
-                        Admin
+                        {customer && customer.role === "customer" ? "My Account" : "Sign in"}
                     </NavLink>
                 </div>
             )}
